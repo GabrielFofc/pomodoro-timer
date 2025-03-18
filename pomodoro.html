@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Timer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #121212;
+      color: #e0e0e0;
+      position: relative;
+    }
+    #pomodoro-title {
+      font-family: 'Pacifico', cursive;
+      font-size: 5rem;
+      color: #ff6347;
+      margin-bottom: 30px;
+    }
+    #timer-container {
+      text-align: center;
+      background-color: #1f1f1f;
+      padding: 40px 30px;
+      border-radius: 20px;
+      width: 300px;
+    }
+    #timer {
+      font-size: 5rem;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    #status {
+      font-size: 1.4rem;
+      color: #bbb;
+      margin-bottom: 20px;
+    }
+    #progress-dots {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .dot {
+      width: 20px;
+      height: 20px;
+      margin: 5px;
+      border-radius: 50%;
+      background-color: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #fff;
+      font-weight: bold;
+    }
+    #bubble {
+      position: absolute;
+      top: 80%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #ffeb3b;
+      animation: expandContract 3s infinite ease-in-out;
+    }
+    @keyframes expandContract {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.5);
+      }
+    }
+    button {
+      padding: 8px 18px;
+      font-size: 1.2rem;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    #pause-button, #resume-button {
+      background-color: #ff6347;
+    }
+    #pause-button:hover, #resume-button:hover {
+      background-color: #e0523c;
+    }
+  </style>
+</head>
+<body>
+  <audio id="alarm" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+  <div id="pomodoro-title">Pomodoro</div>
+  <div id="progress-dots">
+    <div class="dot" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
+    <div class="dot" id="dot3"></div>
+    <div class="dot" id="dot4"></div>
+  </div>
+  <div id="timer-container">
+    <div id="timer">
+      <span id="minutes">25</span>:<span id="seconds">00</span>
+    </div>
+    <div id="status">Foco! (25 Minutos)</div>
+    <button id="pause-button">Pausar</button>
+    <button id="resume-button" style="display: none;">Retomar</button>
+  </div>
+  <div id="bubble"></div>
+  <script>
+    let minutes = 25;
+    let seconds = 0;
+    let timerInterval;
+    let isPaused = false;
+    let isBreak = false;
+    let pomodoroCount = 0;
+    const alarm = document.getElementById("alarm");
+
+    function updateTimer() {
+      if (!isPaused) {
+        if (minutes === 0 && seconds === 0) {
+          clearInterval(timerInterval);
+          alarm.play();
+          isBreak = !isBreak;
+          if (!isBreak) {
+            pomodoroCount++;
+            if (pomodoroCount <= 4) {
+              document.getElementById(`dot${pomodoroCount}`).textContent = '✔';
+              document.getElementById(`dot${pomodoroCount}`).style.backgroundColor = '#4CAF50';
+            }
+          }
+          minutes = isBreak ? 5 : 25;
+          seconds = 0;
+          document.getElementById("status").textContent = isBreak ? "Intervalo! (5 Minutos)" : "Foco! (25 Minutos)";
+          startTimer();
+        } else {
+          if (seconds === 0) {
+            seconds = 59;
+            minutes--;
+          } else {
+            seconds--;
+          }
+        }
+        document.getElementById("minutes").textContent = minutes < 10 ? `0${minutes}` : minutes;
+        document.getElementById("seconds").textContent = seconds < 10 ? `0${seconds}` : seconds;
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function pauseTimer() {
+      isPaused = true;
+      document.getElementById("pause-button").style.display = "none";
+      document.getElementById("resume-button").style.display = "inline-block";
+    }
+
+    function resumeTimer() {
+      isPaused = false;
+      document.getElementById("resume-button").style.display = "none";
+      document.getElementById("pause-button").style.display = "inline-block";
+    }
+
+    window.onload = startTimer;
+    document.getElementById("pause-button").addEventListener("click", pauseTimer);
+    document.getElementById("resume-button").addEventListener("click", resumeTimer);
+  </script>
+</body>
+</html>
